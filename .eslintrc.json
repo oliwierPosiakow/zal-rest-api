@@ -24,20 +24,8 @@
     "import/order": [
       "error",
       {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          ["parent", "sibling", "index"]
-        ],
-        "pathGroups": [
-          { "pattern": "express", "group": "external", "position": "before" },
-          { "pattern": "@config/**", "group": "internal" },
-          { "pattern": "@models/**", "group": "internal" },
-          { "pattern": "@controllers/**", "group": "internal" },
-          { "pattern": "@routes/**", "group": "internal" },
-          { "pattern": "@jobs/**", "group": "internal" }
-        ],
+        "groups": ["builtin", "external", "internal", ["parent", "sibling", "index"]],
+        "pathGroups": [{ "pattern": "express", "group": "external", "position": "before" }],
         "pathGroupsExcludedImportTypes": ["builtin"],
         "alphabetize": { "order": "asc", "caseInsensitive": true },
         "newlines-between": "always"
