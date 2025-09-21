@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addBook, deleteBook, getBookById, getBooks } from "@controllers/book/book.controller.ts";
+import { addBook, deleteBook, getBookById, getBooks, updateBook } from "@controllers/book";
 
 const router = Router();
 
@@ -101,5 +101,51 @@ router.get("/:id", getBookById);
  *         description: Book not found
  */
 router.delete("/:id", deleteBook);
+
+/**
+ * @openapi
+ * /books/{id}:
+ *   patch:
+ *     summary: Partially update a book
+ *     tags:
+ *       - Books
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Book ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               publishedYear:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Book updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               publishedYear:
+ *                 type: number
+ *       404:
+ *         description: Book not found
+ */
+router.patch("/:id", updateBook);
 
 export default router;

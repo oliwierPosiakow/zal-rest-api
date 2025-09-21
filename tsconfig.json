@@ -29,7 +29,7 @@
       "@routes/*": ["routes/*"],
       "@jobs/*": ["jobs/*"],
       "@config/*": ["config/*"],
-      "@db/*": ["db/*"]
+      "@utils/*": ["utils/*"]
     }
   },
 }
