@@ -1,5 +1,6 @@
-import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
 import type { Express } from "express";
 
 const options = {
@@ -7,7 +8,7 @@ const options = {
     openapi: "3.0.0",
     info: { title: "Wypożyczalnia książek REST API", version: "1.0.0" },
   },
-  apis: ["./src/routes/*.ts"],
+  apis: ["./src/routes/**/*.ts"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

@@ -1,52 +1,95 @@
-// src/controllers/loanController.ts
+import db from "db";
+import type { LoanRow } from "types/loan";
+
 import type { Request, Response } from "express";
-
-import { Book } from "@models/book.model";
-import { Loan } from "@models/loan.model";
-import { User } from "@models/user.model";
-
-let loans: Loan[] = [];
-let users: User[] = [new User(1, "Jan Kowalski", "jan@example.com")];
-let books: Book[] = [new Book(1, "Pan Tadeusz", "Adam Mickiewicz", 1834)];
 
 export const borrowBook = (req: Request, res: Response) => {
   const { userId, bookId } = req.body;
 
-  const user = users.find((u) => u.id === userId);
-  const book = books.find((b) => b.id === bookId);
-
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
   if (!user) return res.status(404).json({ message: "Nie znaleziono użytkownika" });
+
+  const book = db.prepare("SELECT * FROM books WHERE id = ?").get(bookId);
   if (!book) return res.status(404).json({ message: "Nie znaleziono książki" });
 
-  // check if book is already borrowed
-  const alreadyLoaned = loans.find((l) => l.book.id === bookId && !l.returned);
-  if (alreadyLoaned) {
-    return res.status(400).json({ message: "Książka już wypożyczona" });
-  }
+  const alreadyLoaned = db
+    .prepare("SELECT * FROM loans WHERE bookId = ? AND returned = 0")
+    .get(bookId);
+  if (alreadyLoaned) return res.status(400).json({ message: "Książka już wypożyczona" });
 
-  const loan = new Loan(
-    loans.length + 1,
-    user,
-    book,
-    new Date(),
-    new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // due in 14 days
-  );
+  const borrowedAt = new Date().toISOString();
+  const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
 
-  loans.push(loan);
-  res.status(201).json(loan);
+  const result = db
+    .prepare("INSERT INTO loans (userId, bookId, borrowedAt, dueDate) VALUES (?, ?, ?, ?)")
+    .run(userId, bookId, borrowedAt, dueDate);
+
+  const loan = db
+    .prepare(
+      `SELECT l.id, l.borrowedAt, l.dueDate, l.returned,
+              u.id as userId, u.name as userName, u.email as userEmail,
+              b.id as bookId, b.title as bookTitle, b.author as bookAuthor, b.publishedYear
+       FROM loans l
+       JOIN users u ON l.userId = u.id
+       JOIN books b ON l.bookId = b.id
+       WHERE l.id = ?`,
+    )
+    .get(result.lastInsertRowid) as LoanRow;
+
+  res.status(201).json({
+    id: loan.id,
+    user: { id: loan.userId, name: loan.userName, email: loan.userEmail },
+    book: {
+      id: loan.bookId,
+      title: loan.bookTitle,
+      author: loan.bookAuthor,
+      publishedYear: loan.publishedYear,
+    },
+    borrowedAt: loan.borrowedAt,
+    dueDate: loan.dueDate,
+    returned: loan.returned,
+  });
 };
 
 export const returnBook = (req: Request, res: Response) => {
   const loanId = Number(req.params.id);
-  const loan = loans.find((l) => l.id === loanId);
 
+  const loan = db.prepare("SELECT * FROM loans WHERE id = ?").get(loanId) as LoanRow;
   if (!loan) return res.status(404).json({ message: "Nie znaleziono wypożyczenia" });
   if (loan.returned) return res.status(400).json({ message: "Książka już zwrócona" });
 
-  loan.returned = true;
-  res.json({ message: "Książka zwrócona", loan });
+  db.prepare("UPDATE loans SET returned = 1 WHERE id = ?").run(loanId);
+
+  res.json({ message: "Książka zwrócona" });
 };
 
 export const getLoans = (req: Request, res: Response) => {
-  res.json(loans);
+  const loans = db
+    .prepare(
+      `SELECT l.id, l.borrowedAt, l.dueDate, l.returned,
+              u.id as userId, u.name as userName, u.email as userEmail,
+              b.id as bookId, b.title as bookTitle, b.author as bookAuthor, b.publishedYear
+       FROM loans l
+       JOIN users u ON l.userId = u.id
+       JOIN books b ON l.bookId = b.id
+       ORDER BY l.id DESC`,
+    )
+    .all() as LoanRow[];
+
+  // Serialize and structure the response
+  const serializedLoans = loans.map((loan) => ({
+    id: loan.id,
+    user: { id: loan.userId, name: loan.userName, email: loan.userEmail },
+    book: {
+      id: loan.bookId,
+      title: loan.bookTitle,
+      author: loan.bookAuthor,
+      publishedYear: loan.publishedYear,
+    },
+    borrowedAt: loan.borrowedAt,
+    dueDate: loan.dueDate,
+    returned: loan.returned === 1,
+  }));
+
+  res.json(serializedLoans);
 };
