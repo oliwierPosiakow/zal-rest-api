@@ -1,0 +1,3 @@
+[task]
+dev = "ts-node src/app.ts"
+test = "jest"
