@@ -1,3 +1,16 @@
 [task]
 dev = "ts-node src/app.ts"
 test = "jest"
+lint = "eslint 'src/**/*.{ts,js}'"
+lint-fix = "eslint 'src/**/*.{ts,js}' --fix"
+format = "prettier --write 'src/**/*.ts'"
+format-check = "prettier --check 'src/**/*.ts'"
+
+
+
+[alias]
+"@models" = "./src/models"
+"@controllers" = "./src/controllers"
+"@routes" = "./src/routes"
+"@jobs" = "./src/jobs"
+"@config" = "./src/config"
