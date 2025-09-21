@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { borrowBook, getLoans, returnBook } from "@controllers/loan/loan.controller.ts";
+import { borrowBook, getLoans, returnBook, updateLoan } from "@controllers/loan";
 
 const router = Router();
 
@@ -96,5 +96,45 @@ router.post("/borrow", borrowBook);
  *         description: Loan not found
  */
 router.post("/return/:id", returnBook);
+
+/**
+ * @openapi
+ * /loans/{id}:
+ *   patch:
+ *     summary: Partially update a loan
+ *     tags:
+ *       - Loans
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Loan ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               returned:
+ *                 type: boolean
+ *                 description: Mark loan as returned
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: New due date
+ *     responses:
+ *       200:
+ *         description: Loan updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Loan'
+ *       404:
+ *         description: Loan not found
+ */
+router.patch("/:id", updateLoan);
 
 export default router;

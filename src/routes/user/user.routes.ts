@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addUser, deleteUser, getUserById, getUsers } from "@controllers/user/user.controller.ts";
+import { addUser, deleteUser, getUserById, getUsers, updateUser } from "@controllers/user";
 
 const router = Router();
 
@@ -100,5 +100,43 @@ router.post("/", addUser);
  *         description: User not found
  */
 router.delete("/:id", deleteUser);
+
+/**
+ * @openapi
+ * /users/{id}:
+ *   patch:
+ *     summary: Partially update a user
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: User updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ */
+router.patch("/:id", updateUser);
 
 export default router;
