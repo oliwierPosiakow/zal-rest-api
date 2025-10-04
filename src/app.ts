@@ -4,11 +4,16 @@ import express from "express";
 
 import { setupSwagger } from "@config/swagger";
 
+import { setupCronJobs } from "@jobs/setup";
+
 const app = express();
 app.use(express.json());
 
 // Swagger
 setupSwagger(app);
+
+//CRON
+setupCronJobs();
 
 //Routes
 assignRoutes(app);
