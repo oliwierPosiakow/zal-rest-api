@@ -6,11 +6,17 @@ lint-fix = "eslint 'src/**/*.{ts,js}' --fix"
 format = "prettier --write 'src/**/*.ts'"
 format-check = "prettier --check 'src/**/*.ts'"
 
-
-
 [alias]
 "@models" = "./src/models"
 "@controllers" = "./src/controllers"
 "@routes" = "./src/routes"
 "@jobs" = "./src/jobs"
 "@config" = "./src/config"
+"@utils" = "./src/utils"
+"@db" = "./src/db.ts"
+
+[scripts]
+dev = "bun --hot run src/app.ts"
+build = "bun tsc"
+start = "bun run dist/app.js"
+bundle = "bun build src/app.ts --outdir dist --target bun"
